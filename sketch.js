@@ -1,5 +1,5 @@
 /**
-  *	@author Luke Aaron Reynolds
+  *	@author Luke Reynolds
   *	@email lreynolds188@gmail.com
   *	@website http://lukereynolds.net/
   */
