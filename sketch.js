@@ -1,8 +1,8 @@
 /**
-	*	@author Luke Aaron Reynolds
+  *	@author Luke Aaron Reynolds
   *	@email lreynolds188@gmail.com
   *	@website http://lukereynolds.net/
-	*/
+  */
 
 var ballXDirection = null;
 var ballYDirection = null;
