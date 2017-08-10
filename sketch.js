@@ -17,6 +17,7 @@ var enemyY = 240;
 var enemySpeed = 4;
 var lives = 10;
 var level = 1;
+var shootPlasma = false;
 var suckPlasma = false;
 var holdingBall = false;
 var multiplier = 0;
@@ -33,9 +34,9 @@ var force = null;
 var particleSystem = null;
 
 function preload() {
-    particleTexture = loadImage("Assets/particle_texture.png");
-    defaultFont = loadFont('Assets/repetition.otf');
-    myFont = loadFont('Assets/space.otf');
+    particleTexture = loadImage("particle_texture.png");
+    defaultFont = loadFont('repetition.otf');
+    myFont = loadFont('space.otf');
 }
 
 function setup() {
@@ -43,53 +44,16 @@ function setup() {
     updateColors();
     // initialize the particle system sending it the start location and the image
     particleSystem = new ParticleSystem(createVector(ballX, ballY), particleTexture);
+  	
 }
 
 function draw() {
     background(0);
-    force = createVector(-ballXDirection / 80, -ballYDirection / 80); // location to move the image in
-    particleSystem.applyForce(force);
-    particleSystem.run();
-    for (var i = 0; i < 3; i++) { // each iteration increases particle density
-        particleSystem.addParticle(createVector(ballX, ballY));
-    }
-    // scoreboard
-    fill(0, 0);
-    stroke(0, 255, 0);
-    quad(70, 5, 50, 30, 200, 30, 220, 5);
-    quad(230, 5, 210, 30, 520, 30, 500, 5);
-    quad(510, 5, 530, 30, 670, 30, 650, 5);
-
-    // charge indicators
-    fill(charge, 180 - charge, 0);
-    noStroke();
-    quad(70, 5, 50, 30, 50 + charge, 30, 70 + charge, 5);
-
-    // lives
-    fill(255, 255, 255);
-    textFont(defaultFont);
-    stroke(0);
-    textSize(14);
-    text("Lives: " + lives, 270, 24);
-
-    // level
-    fill(255, 0, 0);
-    textFont(myFont);
-    text("Level: " + level, 380, 23);
-
-    // player
-    fill(playerColor);
-    rect(playerX - 20, playerY - 40, 20, 80, 4);
-
-    // enemy
-    fill(enemyColor);
-    rect(enemyX, enemyY - 40, 20, 80, 4);
-
-    // ball
-    fill(particleColor, 0);
-    stroke(255, 255, 255);
-    ellipse(ballX, ballY, 20, 20);
-
+    generateParticleForce();
+    drawScoreboard();
+  	drawChargeIndicators();
+		drawText();
+		drawGameObjects();
     update();
 }
 
@@ -142,7 +106,7 @@ function update() {
         if (collisionDetect(ballX, ballY, playerX, playerY)) {
             reboundBall(true);
         }
-        if (collisionDetect(ballX, ballY, enemyX, enemyY)) {
+      	if (collisionDetect(ballX, ballY, enemyX, enemyY)) {
             reboundBall(false);
         }
 
@@ -154,7 +118,7 @@ function update() {
         }
     } else {
         holdBall();
-        // start game
+				// start game
         if (mouseIsPressed) {
             playing = true;
             ballXDirection = 10;
@@ -179,6 +143,49 @@ function updateColors() {
     playerColor = color(random(255), random(255), random(255));
     enemyColor = color(random(255), random(255), random(255));
     particleColor = [random(255), random(255), random(255)];
+}
+
+function drawScoreboard() {
+ 		fill(0, 0);
+    stroke(0, 255, 0);
+    quad(70, 5, 50, 30, 200, 30, 220, 5);
+    quad(230, 5, 210, 30, 520, 30, 500, 5);
+    quad(510, 5, 530, 30, 670, 30, 650, 5); 
+}
+
+function drawChargeIndicators()	{
+    fill(charge, 180 - charge, 0);
+    noStroke();
+    quad(70, 5, 50, 30, 50 + charge, 30, 70 + charge, 5);
+}
+
+function drawText() {
+  	// lives
+    fill(255, 255, 255);
+  	textFont(defaultFont);
+    stroke(0);
+    textSize(14);
+    text("Lives: " + lives, 270, 24);
+  
+  	// level
+    fill(255, 0, 0);
+    textFont(myFont);
+    text("Level: " + level, 380, 23);
+}
+
+function drawGameObjects() {
+ 		// player
+    fill(playerColor);
+    rect(playerX - 20, playerY - 40, 20, 80, 4);
+
+    // enemy
+    fill(enemyColor);
+    rect(enemyX, enemyY - 40, 20, 80, 4);
+
+    // ball
+    fill(particleColor, 0);
+    stroke(255, 255, 255);
+    ellipse(ballX, ballY, 20, 20); 
 }
 
 function holdBall() {
@@ -213,9 +220,23 @@ function collisionDetect(object1X, object1Y, object2X, object2Y) {
     }
 }
 
-// PARTICLE SYSTEM CLASS
+function generateParticleForce() {
+  	force = createVector(-ballXDirection / 80, -ballYDirection / 80); // location to move the particle in
+    particleSystem.applyForce(force);
+    particleSystem.run();
+    for (var i = 0; i < 3; i++) { // each iteration increases particle density
+        particleSystem.addParticle(createVector(ballX, ballY));
+    }
+}
+		
+/** http://alpha.editor.p5js.org/p5/sketches/rJZG3HV4Xbb
+  * The particle system for this project was cloned and modified from the p5.js examples (link above)
+  * The code was modified to allow the particles to generate at the ball's location and trail behind
+**/
+
+// PARTICLE SYSTEM FUNCTION
 var ParticleSystem = function (_vector, _image) {
-    // set required variables
+  	// set required variables
     this._particles = [];
     this._origin = _vector.copy();
     this._image = _image;
@@ -246,7 +267,7 @@ ParticleSystem.prototype.addParticle = function (_location) {
     this._particles.push(new Particle(_location, this._image));  // add particle to the array with location (vector) and image
 }
 
-// PARTICLE CLASS
+// PARTICLE FUNCTION
 var Particle = function (_position, _image) {
     this._location = _position.copy();
     if (holdingBall) {
@@ -256,7 +277,7 @@ var Particle = function (_position, _image) {
     }
     var _vx = randomGaussian() * multiplier;
     var _vy = randomGaussian() * multiplier;
-    this._velocity = createVector(_vx, _vy);
+    this._velocity = createVector(_vx, _vy); 
     this._accelerate = createVector();
     this._lifespan = 80.0;
     this._texture = _image;
